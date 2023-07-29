@@ -20,7 +20,7 @@ import json
 
 ###########################
 # For serving resource list
-from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler, CallbackContext
 
 from telegram import __version__ as TG_VER
@@ -72,9 +72,15 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 ################################################
 # Resource list (keyword: file URL or file path)
 resources = {
-    "keyword1": "https://example.com/file1.pdf",
-    "keyword2": "https://example.com/file2.txt",
-    # Add more keywords and corresponding file URLs or file paths as needed
+    "keyword1": {
+        "file_url": "keyword1.png",
+        "thumbnail": "keyword1.png",
+    },
+    "keyword2": {
+        "file_url": "keyword2.png",
+        "thumbnail": "keyword2.png",
+    },
+    # Add more resources with their respective file URLs and thumbnails
 }
 
 # Define the /resources command handler
@@ -91,16 +97,25 @@ async def resources_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
 # Define the callback query handler to handle resource button clicks
+from telegram import InputFile
+
 async def handle_resource_button(update: Update, context: CallbackContext):
     query = update.callback_query
-    resource_name = query.data
-    if resource_name in resources:
-        file_url = resources[resource_name]
-        await query.message.reply_text(
-            f"Here is the file for resource '{resource_name}': {file_url}"
-        )
+    resource_key = query.data
+
+    if resource_key in resources:
+        file_url = resources[resource_key]["file_url"]
+        thumbnail_url = resources[resource_key].get("thumbnail", None)
+
+        # Send the thumbnail as a photo
+        with open(thumbnail_url, "rb") as thumbnail_file:
+            await query.message.reply_photo(photo=InputFile(thumbnail_file))
+
+        # Send the file back to the user
+        with open(file_url, "rb") as file:
+            await query.message.reply_document(document=InputFile(file))
     else:
-        await query.message.reply_text("Resource not found. Please click on a valid resource button.")
+        await query.message.reply_text("Resource not found.")
 
 def main() -> None:
     """Start the bot."""

@@ -72,15 +72,13 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 ################################################
 # Resource list (keyword: file URL or file path)
 resources = {
-    "keyword1": {
-        "file_url": "keyword1.png",
-        "thumbnail": "keyword1.png",
+    "Bitcoin": {
+        "file_url": "bitcoin.pdf"
     },
-    "keyword2": {
-        "file_url": "keyword2.png",
-        "thumbnail": "keyword2.png",
+    "The Principles Of Tokenomics": {
+        "file_url": "principles-of-tokenomics.pdf"
     },
-    # Add more resources with their respective file URLs and thumbnails
+    # Add more resources with their respective file URLs
 }
 
 # Define the /resources command handler
@@ -105,11 +103,6 @@ async def handle_resource_button(update: Update, context: CallbackContext):
 
     if resource_key in resources:
         file_url = resources[resource_key]["file_url"]
-        thumbnail_url = resources[resource_key].get("thumbnail", None)
-
-        # Send the thumbnail as a photo
-        with open(thumbnail_url, "rb") as thumbnail_file:
-            await query.message.reply_photo(photo=InputFile(thumbnail_file))
 
         # Send the file back to the user
         with open(file_url, "rb") as file:
